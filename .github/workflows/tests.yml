@@ -1,0 +1,52 @@
+name: Tests
+
+# Se déclenche sur chaque push et sur chaque pull request, quelle que soit
+# la branche visée — on veut savoir si la suite de tests casse avant merge.
+on:
+  push:
+  pull_request:
+
+jobs:
+  app-tests:
+    name: Tests Laravel (app/)
+    runs-on: ubuntu-latest
+
+    # Toutes les commandes de ce job s'exécutent dans app/ par défaut,
+    # pour ne pas préfixer chaque étape par "cd app".
+    defaults:
+      run:
+        working-directory: app
+
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v4
+
+      - name: Installation de PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: pdo_sqlite
+          coverage: none
+
+      # Met en cache le dossier vendor/ entre les runs, à partir du hash de
+      # composer.lock — évite de retélécharger les dépendances à chaque fois.
+      - name: Cache des dépendances Composer
+        uses: actions/cache@v4
+        with:
+          path: app/vendor
+          key: composer-${{ hashFiles('app/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Installation des dépendances Composer
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      # La suite de tests utilise SQLite en mémoire (voir phpunit.xml) : pas
+      # besoin de service de base de données ni de fichier .env complet, mais
+      # Laravel exige quand même une APP_KEY valide pour démarrer.
+      - name: Génération de la clé d'application
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Lancement des tests
+        run: php artisan test
