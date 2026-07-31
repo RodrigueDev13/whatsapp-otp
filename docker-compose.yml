@@ -1,0 +1,60 @@
+services:
+  engine:
+    build: ./engine
+    restart: unless-stopped
+    environment:
+      ENGINE_PORT: 3001
+      ENGINE_INTERNAL_SECRET: ${ENGINE_INTERNAL_SECRET}
+      WWEBJS_DATA_PATH: /app/.wwebjs_auth
+      PUPPETEER_HEADLESS: "true"
+    volumes:
+      - wwebjs_auth:/app/.wwebjs_auth
+    # Never publish this port to the host — Laravel reaches it over the
+    # private compose network at http://engine:3001. Only on `internal`,
+    # unreachable from `caddy` even if `caddy` is compromised.
+    networks: [internal]
+
+  app:
+    build: ./app
+    restart: unless-stopped
+    depends_on: [engine]
+    environment:
+      APP_ENV: production
+      APP_KEY: ${APP_KEY}
+      APP_URL: https://${DOMAIN}
+      DB_CONNECTION: sqlite
+      SESSION_SECURE_COOKIE: "true"
+      WA_ENGINE_URL: http://engine:3001
+      ENGINE_INTERNAL_SECRET: ${ENGINE_INTERNAL_SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    volumes:
+      - app_database:/app/database
+    # No `ports:` here — only `caddy` is published to the host, `app` is
+    # reached over the private `web` network at http://app:8000.
+    networks: [internal, web]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [app]
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    ports:
+      - "80:80"
+      - "443:443"
+    networks: [web]
+
+networks:
+  internal:
+  web:
+
+volumes:
+  wwebjs_auth:
+  app_database:
+  caddy_data:
+  caddy_config:
