@@ -11,7 +11,7 @@ services:
       - wwebjs_auth:/app/.wwebjs_auth
     # Never publish this port to the host — Laravel reaches it over the
     # private compose network at http://engine:3001. Only on `internal`,
-    # unreachable from `caddy` even if `caddy` is compromised.
+    # unreachable from `ngrok` even if `ngrok` is compromised.
     networks: [internal]
 
   app:
@@ -30,23 +30,22 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     volumes:
       - app_database:/app/database
-    # No `ports:` here — only `caddy` is published to the host, `app` is
-    # reached over the private `web` network at http://app:8000.
+    # No `ports:` here — `app` is only reached over the private `web`
+    # network, at http://app:8000, by the `ngrok` service.
     networks: [internal, web]
 
-  caddy:
-    image: caddy:2-alpine
+  ngrok:
+    image: ngrok/ngrok:latest
     restart: unless-stopped
     depends_on: [app]
     environment:
-      DOMAIN: ${DOMAIN}
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    ports:
-      - "80:80"
-      - "443:443"
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    # --url requires a reserved/static domain from your ngrok account (free
+    # tier includes one) so APP_URL and the public URL stay stable across
+    # restarts — see README "Alternative : exposer avec ngrok".
+    command: ["http", "--url=https://${DOMAIN}", "app:8000"]
+    # No `ports:` here either — ngrok connects outbound to ngrok's cloud,
+    # nothing needs to be published on the host or forwarded on the router.
     networks: [web]
 
 networks:
@@ -56,5 +55,3 @@ networks:
 volumes:
   wwebjs_auth:
   app_database:
-  caddy_data:
-  caddy_config:

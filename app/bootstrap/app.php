@@ -17,10 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'api.key' => \App\Http\Middleware\ApiKeyAuth::class,
         ]);
 
-        // Behind the `caddy` reverse-proxy container (docker-compose.yml):
-        // trust its X-Forwarded-* headers so Laravel generates https:// URLs
-        // and treats the request as secure. Safe to trust '*' here because
-        // `app` is not published to the host — only `caddy` can reach it,
+        // Behind the `ngrok` container (docker-compose.yml): trust its
+        // X-Forwarded-* headers so Laravel generates https:// URLs and
+        // treats the request as secure. Safe to trust '*' here because
+        // `app` is not published to the host — only `ngrok` can reach it,
         // over the private `web` compose network.
         $middleware->trustProxies(at: '*');
     })

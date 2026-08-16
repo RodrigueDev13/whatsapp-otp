@@ -154,40 +154,51 @@ Optionnel — utile si vous déployez un jour sur un serveur distant exposé sur
 Internet plutôt que sur ce PC. Aucune dépendance à Docker n'est nécessaire
 pour l'usage local décrit ci-dessus.
 
-Ce déploiement inclut un service `caddy` qui termine le TLS : il obtient et
-renouvelle automatiquement un certificat Let's Encrypt pour le domaine que
-vous indiquez, puis fait reverse-proxy vers `app`. **Prérequis avant de
-lancer** : un nom de domaine dont l'enregistrement DNS A pointe vers l'IP
-publique de l'hôte, et les ports **80 et 443 accessibles depuis Internet**
-(port forwarding sur la box/le pare-feu vers ce conteneur/VM si nécessaire —
-Caddy en a besoin pour la validation ACME du certificat).
+Ce déploiement inclut un service `ngrok` qui expose `app` publiquement en
+HTTPS via un tunnel **sortant** vers le cloud ngrok : pas de nom de domaine à
+acheter, pas d'enregistrement DNS, pas de port à ouvrir/rediriger sur le
+routeur ou le pare-feu (contrairement à un reverse-proxy classique type
+Caddy/Nginx qui a besoin des ports 80/443 accessibles depuis Internet).
+
+**Prérequis avant de lancer** :
+- Un compte ngrok (gratuit) et son authtoken :
+  https://dashboard.ngrok.com/get-started/your-authtoken
+- Un domaine statique/réservé ngrok (le tier gratuit en inclut un, du type
+  `votre-nom.ngrok-free.dev`) — **indispensable** pour que l'URL publique
+  reste stable entre les redémarrages : l'endpoint `POST /api/otp/send` est
+  censé être appelé par d'autres systèmes qui ont besoin d'une URL fixe.
+  Un sous-domaine aléatoire (non réservé) change à chaque redémarrage du
+  conteneur `ngrok`, ce qui casserait ces intégrations.
 
 ```bash
 cp .env.example .env
-# renseignez DOMAIN, APP_KEY (générez-la avec la commande ci-dessous),
-# ENGINE_INTERNAL_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD
+# renseignez DOMAIN (votre domaine ngrok statique), NGROK_AUTHTOKEN,
+# APP_KEY (générez-la avec la commande ci-dessous), ENGINE_INTERNAL_SECRET,
+# ADMIN_EMAIL, ADMIN_PASSWORD
 docker compose run --rm app php artisan key:generate --show   # copiez la valeur dans .env
 
 docker compose up -d --build
 ```
 
-Ouvrez `https://<DOMAIN>` — Caddy sert automatiquement en HTTPS dès que le
-domaine résout vers l'hôte.
+Ouvrez `https://<DOMAIN>` — dès que le conteneur `ngrok` a établi le tunnel
+(vérifiable dans ses logs), l'app y est accessible en HTTPS.
 
-- Seul le service `caddy` publie des ports sur l'hôte (80/443). `app` n'est
-  joignable que par `caddy` sur le réseau Docker privé `web`, et `engine`
-  reste strictement interne au réseau `internal` (`http://engine:3001`) —
-  ni l'un ni l'autre n'est jamais exposé directement à l'extérieur.
-- Les données de session WhatsApp (`.wwebjs_auth`), la base SQLite et les
-  certificats TLS de Caddy sont persistés dans des volumes Docker nommés —
-  ils survivent aux redéploiements (`docker compose up --build` ne force ni
-  un nouveau scan de QR code, ni un nouveau certificat).
-- Vous avez déjà un reverse proxy sur cet hôte pour d'autres services (Nginx
-  Proxy Manager, Traefik...) ? Retirez le service `caddy` de
-  `docker-compose.yml`, republiez le port de `app` (`ports: ["8000:8000"]`)
-  et laissez votre proxy existant gérer le TLS à sa place — `app` reste
-  configuré pour faire confiance aux headers `X-Forwarded-*` d'un proxy
-  amont (voir `trustProxies` dans `app/bootstrap/app.php`).
+- Seul le service `ngrok` a un chemin vers l'extérieur (tunnel sortant, pas
+  de `ports:` publiés sur l'hôte). `app` n'est joignable que par `ngrok` sur
+  le réseau Docker privé `web`, et `engine` reste strictement interne au
+  réseau `internal` (`http://engine:3001`) — ni l'un ni l'autre n'est jamais
+  exposé directement.
+- Les données de session WhatsApp (`.wwebjs_auth`) et la base SQLite sont
+  persistées dans des volumes Docker nommés — elles survivent aux
+  redéploiements (`docker compose up --build` ne force pas un nouveau scan
+  de QR code).
+- Vous avez déjà (ou préférez) un reverse proxy classique sur cet hôte
+  (Nginx Proxy Manager, Traefik, Caddy...) avec un vrai nom de domaine et
+  les ports 80/443 ouverts ? Remplacez le service `ngrok` par votre proxy
+  dans `docker-compose.yml`, republiez le port de `app`
+  (`ports: ["8000:8000"]`) et laissez ce proxy gérer le TLS à sa place —
+  `app` reste configuré pour faire confiance aux headers `X-Forwarded-*`
+  d'un proxy amont (voir `trustProxies` dans `app/bootstrap/app.php`).
 - `php artisan serve` (utilisé dans le conteneur `app`) convient pour le
   faible trafic attendu d'un endpoint OTP transactionnel ; passez à
   PHP-FPM + Nginx si vous avez besoin de plus de débit.
