@@ -76,12 +76,12 @@
 
     <div class="card-grid">
         <a href="{{ route('api-keys.index') }}" class="feature-card">
-            <div class="icon">🔑</div>
+            <div class="icon"><i class="fi fi-rr-key"></i></div>
             <h3>Clés API</h3>
             <p>Générez et révoquez les clés utilisées pour appeler l'API d'envoi.</p>
         </a>
         <a href="{{ route('docs') }}" class="feature-card">
-            <div class="icon">📘</div>
+            <div class="icon"><i class="fi fi-rr-book-open-cover"></i></div>
             <h3>Documentation</h3>
             <p>Référence de l'endpoint et guide d'intégration Laravel complet.</p>
         </a>

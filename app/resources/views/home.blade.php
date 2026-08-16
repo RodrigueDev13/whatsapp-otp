@@ -29,17 +29,17 @@
 
     <div class="card-grid">
         <div class="feature-card" style="cursor:default;">
-            <div class="icon">🔌</div>
+            <div class="icon"><i class="fi fi-rr-link"></i></div>
             <h3>Un seul endpoint</h3>
             <p><code>POST /api/otp/send</code>, protégé par une clé API — envoyez un message à un numéro, c'est tout.</p>
         </div>
         <div class="feature-card" style="cursor:default;">
-            <div class="icon">📱</div>
+            <div class="icon"><i class="fi fi-rr-qrcode"></i></div>
             <h3>QR code &amp; dashboard</h3>
             <p>Liez un numéro WhatsApp en scannant un QR code, suivez le statut de la session en temps réel.</p>
         </div>
         <div class="feature-card" style="cursor:default;">
-            <div class="icon">🔒</div>
+            <div class="icon"><i class="fi fi-rr-shield-check"></i></div>
             <h3>Auto-hébergé</h3>
             <p>Laravel + sidecar Node.js, vos données restent chez vous — rien ne transite par un tiers.</p>
         </div>

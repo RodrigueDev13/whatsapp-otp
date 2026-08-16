@@ -11,6 +11,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'WhatsApp OTP')</title>
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css">
     <style>
         :root {
             color-scheme: light;
@@ -195,13 +196,14 @@
         .panel-body a { color: var(--accent); text-decoration: none; }
         .panel-body a:hover { text-decoration: underline; }
 
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 10px; }
         .feature-card {
             display: block; background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
             padding: 1.6rem; text-decoration: none !important; transition: transform .15s, border-color .15s, box-shadow .15s;
         }
         .feature-card:hover { transform: translateY(-3px); border-color: #ff2d2066; box-shadow: 0 16px 40px -20px #ff2d2055; }
-        .feature-card .icon { font-size: 1.6rem; margin-bottom: .8rem; }
+        .feature-card .icon { font-size: 1.6rem; margin-bottom: .8rem; color: var(--accent); }
+        .feature-card .icon i, .icon i { display: block; }
         .feature-card h3 { margin: 0 0 .4rem; font-size: 1.05rem; color: var(--text); }
         .feature-card p { margin: 0; font-size: .88rem; color: var(--text-muted); }
 
@@ -247,7 +249,7 @@
                 </nav>
                 <a href="{{ route('login') }}" class="btn-outline" style="text-decoration:none;">Connexion</a>
             @endauth
-            <button type="button" id="theme-toggle" aria-label="Changer de thème">🌙</button>
+            <button type="button" id="theme-toggle" aria-label="Changer de thème"><i class="fi fi-rr-moon"></i></button>
         </div>
     </header>
 
@@ -255,11 +257,17 @@
 
     @stack('scripts')
 
+    <footer style="max-width:1080px; margin:2rem auto 0; padding:1.5rem 1.5rem 0; text-align:center; font-size:.75rem; color:var(--text-muted);">
+        Icônes <a href="https://www.flaticon.com/uicons" target="_blank" rel="noopener">Uicons par Flaticon</a>
+    </footer>
+
     <script>
         (function () {
             var btn = document.getElementById('theme-toggle');
-            var icon = function (theme) { return theme === 'dark' ? '☀️' : '🌙'; };
-            var sync = function () { btn.textContent = icon(document.documentElement.getAttribute('data-theme')); };
+            var icon = function (theme) { return theme === 'dark' ? 'fi-rr-sun' : 'fi-rr-moon'; };
+            var sync = function () {
+                btn.querySelector('i').className = 'fi ' + icon(document.documentElement.getAttribute('data-theme'));
+            };
             sync();
             btn.addEventListener('click', function () {
                 var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
