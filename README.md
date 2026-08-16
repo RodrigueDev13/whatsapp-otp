@@ -183,6 +183,12 @@ docker compose up -d --build
 Ouvrez `https://<DOMAIN>` — dès que le conteneur `ngrok` a établi le tunnel
 (vérifiable dans ses logs), l'app y est accessible en HTTPS.
 
+**Mise à jour automatique (déploiement via Portainer)** : si le stack est
+créé depuis un dépôt Git dans Portainer, activez un webhook (Stack →
+*Auto updates* → *Webhook*) et déclarez l'URL générée comme webhook sur le
+dépôt GitHub (*Settings → Webhooks*, événement `push`) — chaque push sur
+`master` redéploie alors le stack automatiquement, sans action manuelle.
+
 - Seul le service `ngrok` a un chemin vers l'extérieur (tunnel sortant, pas
   de `ports:` publiés sur l'hôte). `app` n'est joignable que par `ngrok` sur
   le réseau Docker privé `web`, et `engine` reste strictement interne au
