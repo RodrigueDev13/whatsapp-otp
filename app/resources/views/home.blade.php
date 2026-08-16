@@ -14,8 +14,7 @@
             pas de template à faire approuver.
         </p>
         <div style="display:flex; gap:.85rem; justify-content:center; margin-top:1.75rem; flex-wrap:wrap;">
-            <a href="{{ route('docs') }}" class="btn-outline" style="text-decoration:none; padding:.7rem 1.5rem; font-size:.9rem;">Documentation</a>
-            <a href="{{ route('login') }}" class="btn-pill" style="text-decoration:none;">Connexion admin</a>
+            <a href="{{ route('docs') }}" class="btn-pill" style="text-decoration:none;">Documentation</a>
         </div>
     </div>
 

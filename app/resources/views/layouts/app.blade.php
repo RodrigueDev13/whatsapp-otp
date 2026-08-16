@@ -50,7 +50,11 @@
         }
         body.docs-page { max-width: 1180px; }
         a { color: var(--accent); }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; }
+        header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem;
+            position: sticky; top: 0; z-index: 20; background: var(--bg);
+            border-bottom: 1px solid var(--border-soft);
+        }
         h1 { font-size: 1.4rem; margin: 0; }
         h1 a { color: var(--text); text-decoration: none; }
         nav a { color: var(--nav-link); margin-right: 1rem; font-size: .9rem; text-decoration: none; }
