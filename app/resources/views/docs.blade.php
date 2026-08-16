@@ -33,8 +33,12 @@
 
         <div class="group-title">Liens rapides</div>
         <ul>
-            <li><a href="{{ route('dashboard') }}">Dashboard</a></li>
-            <li><a href="{{ route('api-keys.index') }}">Clés API</a></li>
+            @auth
+                <li><a href="{{ route('dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ route('api-keys.index') }}">Clés API</a></li>
+            @else
+                <li><a href="{{ route('login') }}">Connexion admin</a></li>
+            @endauth
         </ul>
     </aside>
 

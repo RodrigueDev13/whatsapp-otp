@@ -225,7 +225,7 @@
 </head>
 <body class="@yield('body-class')">
     <header>
-        <h1><a href="{{ route('dashboard') }}">WhatsApp OTP</a></h1>
+        <h1><a href="{{ route('home') }}">WhatsApp OTP</a></h1>
         <div style="display:flex; align-items:center; gap:1rem;">
             @auth
                 <nav>
@@ -237,6 +237,11 @@
                     @csrf
                     <button type="submit" class="secondary">Déconnexion</button>
                 </form>
+            @else
+                <nav>
+                    <a href="{{ route('docs') }}">Documentation</a>
+                </nav>
+                <a href="{{ route('login') }}" class="btn-outline" style="text-decoration:none;">Connexion</a>
             @endauth
             <button type="button" id="theme-toggle" aria-label="Changer de thème">🌙</button>
         </div>

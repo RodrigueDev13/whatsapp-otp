@@ -42,9 +42,9 @@ class LoginTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_docs_page_requires_authentication(): void
+    public function test_guest_can_view_the_docs_page(): void
     {
-        $this->get('/docs')->assertRedirect('/login');
+        $this->get('/docs')->assertOk()->assertSee('POST /api/otp/send', false);
     }
 
     public function test_authenticated_user_can_view_the_docs_page(): void
